@@ -77,7 +77,7 @@ class BasicBlock:
         body = []
         for ast_node in ast:
             if type(ast_node) in BasicBlock.invalid_ast_nodes:
-                continue
+                return body
             elif isinstance(ast_node, Expr):
                 body.append(ast_node.value)
             else:
@@ -85,9 +85,9 @@ class BasicBlock:
         return body
 
     @staticmethod
-    def build_from_ast(ast: List[AST]) -> "BasicBlock":
+    def build_first_from_ast(ast: List[AST]) -> "BasicBlock":
         """
-        Builds a single basic block from its AST
+        Builds the first basic block from its AST
 
         :param ast (AST): AST to build BasicBlock from
 
