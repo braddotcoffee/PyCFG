@@ -1,5 +1,18 @@
 from typing import List, Union
-from ast import AST, expr, stmt, Call, Expr
+from ast import (
+    AST,
+    expr,
+    stmt,
+    Call,
+    Expr,
+    AsyncFunctionDef,
+    ClassDef,
+    FunctionDef,
+    Return,
+    For,
+    While,
+    If,
+)
 from lazy import lazy
 
 
@@ -13,6 +26,16 @@ class BasicBlock:
 
     :param outbound (List[BasicBlock]): BasicBlocks which this one may call
     """
+
+    invalid_ast_nodes = {
+        FunctionDef,
+        AsyncFunctionDef,
+        ClassDef,
+        Return,
+        For,
+        While,
+        If,
+    }
 
     def __init__(
         self,
@@ -53,7 +76,9 @@ class BasicBlock:
     def _build_body(ast: List[Union[expr, stmt]]):
         body = []
         for ast_node in ast:
-            if isinstance(ast_node, Expr):
+            if type(ast_node) in BasicBlock.invalid_ast_nodes:
+                continue
+            elif isinstance(ast_node, Expr):
                 body.append(ast_node.value)
             else:
                 body.append(ast_node)
