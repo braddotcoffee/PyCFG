@@ -89,7 +89,7 @@ class BasicBlock:
                 body.append(ast_node.value)
             else:
                 body.append(ast_node)
-        return body, ast[i:]
+        return body, []
 
     @staticmethod
     def build_first_from_ast(
