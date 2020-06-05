@@ -1,8 +1,6 @@
-from typing import List, Union, Tuple
+from typing import List, Tuple
 from ast import (
     AST,
-    expr,
-    stmt,
     Call,
     Expr,
     AsyncFunctionDef,
@@ -12,10 +10,10 @@ from ast import (
     For,
     While,
     If,
+    Try,
+    ExceptHandler,
 )
 from lazy import lazy
-
-BasicBlockASTNode = Union[expr, stmt]
 
 
 class BasicBlock:
@@ -37,6 +35,8 @@ class BasicBlock:
         For,
         While,
         If,
+        Try,
+        ExceptHandler,
     }
 
     def __init__(
@@ -59,7 +59,7 @@ class BasicBlock:
         )
 
     @staticmethod
-    def _validate_ast_node(ast: List[AST]) -> List[BasicBlockASTNode]:
+    def _validate_ast_node(ast: List[any]) -> List[AST]:
         """
         Ensure that ast_node is a statement (stmt)
 
@@ -68,20 +68,16 @@ class BasicBlock:
         :raise: ValueError if ast_node is not a subclass of stmt
         """
         for ast_node in ast:
-            if not isinstance(ast_node, expr) and not isinstance(
-                ast_node, stmt
-            ):
+            if not isinstance(ast_node, AST):
                 raise ValueError("Invalid AST node provided")
         return ast
 
     @staticmethod
-    def _build_body(
-        ast: List[BasicBlockASTNode],
-    ) -> Tuple[List[BasicBlockASTNode], List[BasicBlockASTNode]]:
+    def _build_body(ast: List[AST],) -> Tuple[List[AST], List[AST]]:
         """
         Build body of first basic block within list of expr or stmt nodes
         """
-        body: List[Union[expr, stmt]] = []
+        body: List[AST] = []
         for i, ast_node in enumerate(ast):
             if type(ast_node) in BasicBlock.invalid_ast_nodes:
                 return body, ast[i:]
@@ -94,7 +90,7 @@ class BasicBlock:
     @staticmethod
     def build_first_from_ast(
         ast: List[AST],
-    ) -> Tuple["BasicBlock", List[BasicBlockASTNode]]:
+    ) -> Tuple["BasicBlock", List[AST]]:
         """
         Builds the first basic block from its AST
 
