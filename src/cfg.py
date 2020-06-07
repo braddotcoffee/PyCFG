@@ -9,28 +9,17 @@ class CFG:
         self.basic_blocks = self._build_all_basic_blocks(self.ast_nodes)
 
     @staticmethod
+    def _validate_block_attribute(node: AST, attribute: str) -> bool:
+        return hasattr(node, attribute) and len(getattr(node, attribute)) > 0
+
+    @staticmethod
     def _extract_new_blocks(exit_or_entrance: AST) -> List[List[stmt]]:
         new_blocks: List[List[stmt]] = []
-        if (
-            hasattr(exit_or_entrance, "body")
-            and len(exit_or_entrance.body) > 0
-        ):
-            new_blocks.append(exit_or_entrance.body)
-        if (
-            hasattr(exit_or_entrance, "orelse")
-            and len(exit_or_entrance.orelse) > 0
-        ):
-            new_blocks.append(exit_or_entrance.orelse)
-        if (
-            hasattr(exit_or_entrance, "finalbody")
-            and len(exit_or_entrance.finalbody) > 0
-        ):
-            new_blocks.append(exit_or_entrance.finalbody)
-        if (
-            hasattr(exit_or_entrance, "handlers")
-            and len(exit_or_entrance.handlers) > 0
-        ):
-            new_blocks.append(exit_or_entrance.handlers)
+        block_attributes = ["body", "orelse", "finalbody", "handlers"]
+
+        for attr in block_attributes:
+            if CFG._validate_block_attribute(exit_or_entrance, attr):
+                new_blocks.append(getattr(exit_or_entrance, attr))
         if len(new_blocks) == 0:
             new_blocks.append(exit_or_entrance)
         return new_blocks
