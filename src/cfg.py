@@ -4,7 +4,15 @@ from src.models.basic_block import BasicBlock
 
 
 class CFG:
+    """Class representing the control-flow graph of a program
+    """
+
     def __init__(self, ast_nodes: List[AST]):
+        """Instantiate Control Flow Graph by parsing list of AST nodes
+
+        Args:
+            ast_nodes (List[AST]): AST nodes of program to generate graph for
+        """
         self.ast_nodes = ast_nodes
         self.basic_blocks = self._build_all_basic_blocks(self.ast_nodes)
 
