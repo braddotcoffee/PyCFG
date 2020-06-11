@@ -13,6 +13,9 @@ class EquivalenceClasses:
         self._sizes = []
         self._count = 0
 
+    def __contains__(self, identifier: any):
+        return identifier in self._identifiers
+
     @property
     def count(self) -> int:
         """Number of unique equivalence classes currently tracked"""

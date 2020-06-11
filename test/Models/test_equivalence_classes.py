@@ -38,3 +38,8 @@ class TestEquivalenceClasses(unittest.TestCase):
         self.assertEqual(2, self.equivalence_classes.count)
         self.equivalence_classes.union(1, 2)
         self.assertEqual(1, self.equivalence_classes.count)
+
+    def test_can_check_if_item_inside(self):
+        self.assertFalse(1 in self.equivalence_classes)
+        self.equivalence_classes.add(1)
+        self.assertTrue(1 in self.equivalence_classes)
