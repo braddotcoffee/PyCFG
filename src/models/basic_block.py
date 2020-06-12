@@ -21,10 +21,6 @@ class BasicBlock:
     A BasicBlock encapsulates a straight line code sequence
 
     :param body (List[AST]): AST nodes which make up the BasicBlock
-
-    :param inbound (List[BasicBlock]): BasicBlocks which call this one
-
-    :param outbound (List[BasicBlock]): BasicBlocks which this one may call
     """
 
     invalid_ast_nodes = {
@@ -49,8 +45,6 @@ class BasicBlock:
         self.identifier = BasicBlock._next_id
         BasicBlock._next_id += 1
         self.body = body if body is not None else list()
-        self.inbound = inbound if inbound is not None else list()
-        self.outbound = outbound if outbound is not None else list()
 
     def __hash__(self):
         return self.identifier
