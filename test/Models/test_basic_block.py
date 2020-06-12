@@ -4,6 +4,22 @@ from ast import Expr, parse, Call, Constant, While
 
 
 class TestBasicBlockFromAst(unittest.TestCase):
+    def test_basic_block_ids_auto_increment(self):
+        basic_block = BasicBlock()
+        basic_block_id = basic_block.identifier
+        basic_block = BasicBlock()
+        self.assertEqual(basic_block_id + 1, basic_block.identifier)
+
+    def test_basic_blocks_are_hashable_by_identifier(self):
+        test_set = set()
+        basic_block = BasicBlock()
+        basic_block.identifier = -1
+        test_set.add(basic_block)
+        basic_block.identifier = 1
+        self.assertNotIn(basic_block, test_set)
+        basic_block.identifier = -1
+        self.assertIn(basic_block, test_set)
+
     def test_build_returns_BasicBlock(self):
         sample_ast = [Expr(Constant())]
         basic_block, remaining_nodes = BasicBlock.build_first_from_ast(

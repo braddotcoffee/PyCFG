@@ -38,6 +38,7 @@ class BasicBlock:
         Try,
         ExceptHandler,
     }
+    _next_id = 0
 
     def __init__(
         self,
@@ -45,9 +46,14 @@ class BasicBlock:
         inbound: List["BasicBlock"] = None,
         outbound: List["BasicBlock"] = None,
     ):
+        self.identifier = BasicBlock._next_id
+        BasicBlock._next_id += 1
         self.body = body if body is not None else list()
         self.inbound = inbound if inbound is not None else list()
         self.outbound = outbound if outbound is not None else list()
+
+    def __hash__(self):
+        return self.identifier
 
     @lazy
     def function_calls(self):
