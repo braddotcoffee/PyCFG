@@ -1,4 +1,5 @@
 from typing import List, Dict
+from .node import Node
 
 
 class EquivalenceClasses:
@@ -9,6 +10,7 @@ class EquivalenceClasses:
 
     def __init__(self):
         self._roots: List[int] = []
+        self._nodes: List[Node] = []
         self._identifiers: Dict[any, int] = {}
         self._sizes = []
         self._count = 0
@@ -54,6 +56,7 @@ class EquivalenceClasses:
 
         new_item_index = len(self._roots)
         self._roots.append(new_item_index)
+        self._nodes.append(Node(identifier))
         self._sizes.append(1)
         self._identifiers[identifier] = new_item_index
         self._count += 1
@@ -72,6 +75,15 @@ class EquivalenceClasses:
         return self._find_root(self._identifiers[identifier])
 
     def union(self, identifier_one: any, identifier_two: any):
+        """Union the equivalence classes containing two items
+
+        Args:
+            identifier_one (any): Any identifier tracked by equivalence classes
+            identifier_two (any): Any identifier tracked by equivalence classes
+
+        Raises:
+            ValueError: If either identifier passed has not been added
+        """
         if (
             identifier_one not in self._identifiers
             or identifier_two not in self._identifiers
@@ -95,3 +107,34 @@ class EquivalenceClasses:
             self._roots[root_two] = root_one
             self._sizes[root_one] += self._sizes[root_two]
         self._count -= 1
+
+    def connect(self, source: any, destination: any):
+        """Connect two identifiers, signifying valid transition from
+        source to destination
+
+        Args:
+            source (any): Source of valid transition
+            destination (any): Destination of valid transition
+
+        Raises:
+            ValueError: If either identifier passed has not been added
+        """
+        self.union(source, destination)
+        source_node = self.get_node(source)
+        source_node.connected_nodes.add(self.get_node(destination))
+
+    def get_node(self, identifier: any) -> Node:
+        """Get CFG node
+
+        Args:
+            identifier (any): Identifier of node to get
+
+        Raises:
+            ValueError: If identifier is not tracked by EquivalenceClasses
+
+        Returns:
+            Node: CFG Node corresponding to the given identifier
+        """
+        if identifier not in self._identifiers:
+            raise ValueError("Identifier not tracked by equivalence classes")
+        return self._nodes[self._identifiers[identifier]]

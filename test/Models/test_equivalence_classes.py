@@ -1,5 +1,6 @@
 import unittest
 from src.models.equivalence_classes import EquivalenceClasses
+from src.models.node import Node
 
 
 class TestEquivalenceClasses(unittest.TestCase):
@@ -43,3 +44,35 @@ class TestEquivalenceClasses(unittest.TestCase):
         self.assertFalse(1 in self.equivalence_classes)
         self.equivalence_classes.add(1)
         self.assertTrue(1 in self.equivalence_classes)
+
+    def test_can_retrieve_node_for_identifier(self):
+        self.equivalence_classes.add(1)
+        node = self.equivalence_classes.get_node(1)
+        self.assertIsInstance(node, Node)
+        self.assertEqual(1, node.identifier)
+
+    def test_get_node_errors_if_untracked(self):
+        with self.assertRaises(ValueError):
+            self.equivalence_classes.get_node(1)
+
+    def test_connect_unions_identifiers(self):
+        self.equivalence_classes.add(1)
+        self.equivalence_classes.add(2)
+        self.equivalence_classes.connect(1, 2)
+        self.assertEqual(
+            self.equivalence_classes.find(1), self.equivalence_classes.find(2)
+        )
+
+    def test_connect_errors_with_untracked_identifer(self):
+        self.equivalence_classes.add(1)
+        with self.assertRaises(ValueError):
+            self.equivalence_classes.connect(1, 2)
+        with self.assertRaises(ValueError):
+            self.equivalence_classes.connect(2, 1)
+
+    def test_connect_adds_destination_to_source_connected_nodes(self):
+        self.equivalence_classes.add(1)
+        self.equivalence_classes.add(2)
+        self.equivalence_classes.connect(1, 2)
+        source_node = self.equivalence_classes.get_node(1)
+        self.assertIn(Node(2), source_node.connected_nodes)
