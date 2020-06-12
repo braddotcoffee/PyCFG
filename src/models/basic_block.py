@@ -17,11 +17,7 @@ from lazy import lazy
 
 
 class BasicBlock:
-    """
-    A BasicBlock encapsulates a straight line code sequence
-
-    :param body (List[AST]): AST nodes which make up the BasicBlock
-    """
+    """A BasicBlock encapsulates a straight line code sequence"""
 
     invalid_ast_nodes = {
         FunctionDef,
@@ -47,9 +43,11 @@ class BasicBlock:
         return self.identifier
 
     @lazy
-    def function_calls(self):
-        """
-        All of the function calls which are a part of this BasicBlock
+    def function_calls(self) -> List[Call]:
+        """All of the function calls which are a part of the body
+
+        Returns:
+            (List[Call]): Calls which are a prt of the body
         """
         return list(
             filter(lambda ast_node: isinstance(ast_node, Call), self.body)
@@ -57,13 +55,7 @@ class BasicBlock:
 
     @staticmethod
     def _validate_ast_node(ast: List[any]) -> List[AST]:
-        """
-        Ensure that ast_node is a statement (stmt)
-
-        :param ast_node (AST): Any AST node
-
-        :raise: ValueError if ast_node is not a subclass of stmt
-        """
+        """Ensure that ast_node is an instance of AST"""
         for ast_node in ast:
             if not isinstance(ast_node, AST):
                 raise ValueError("Invalid AST node provided")
@@ -88,14 +80,18 @@ class BasicBlock:
     def build_first_from_ast(
         ast: List[AST],
     ) -> Tuple["BasicBlock", List[AST]]:
-        """
-        Builds the first basic block from its AST
+        """Builds the first block from its AST
 
-        :param ast (AST): AST to build BasicBlock from
+        Args:
+            ast (List[AST]): List of AST nodes to parse first basic block from
 
-        :returns: A new BasicBlock
+        Returns:
+            Tuple[BasicBlock, List[AST]]: The new basic block and the
+            remaining AST nodes to be parsed
 
-        :raise: ValueError if ast not a list of stmt
+        Raises:
+            ValueError: If attempting to parse an object that is not
+            an instance of AST
         """
         ast = BasicBlock._validate_ast_node(ast)
         body, remaining_nodes = BasicBlock._build_body(ast)
