@@ -121,7 +121,9 @@ class EquivalenceClasses:
         """
         self.union(source, destination)
         source_node = self.get_node(source)
-        source_node.connected_nodes.add(self.get_node(destination))
+        destination_node = self.get_node(destination)
+        source_node.destinations.add(destination_node)
+        destination_node.sources.add(source_node)
 
     def get_node(self, identifier: any) -> Node:
         """Get CFG node

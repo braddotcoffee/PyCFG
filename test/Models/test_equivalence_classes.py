@@ -70,9 +70,11 @@ class TestEquivalenceClasses(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.equivalence_classes.connect(2, 1)
 
-    def test_connect_adds_destination_to_source_connected_nodes(self):
+    def test_connect_adds_mutual_link(self):
         self.equivalence_classes.add(1)
         self.equivalence_classes.add(2)
         self.equivalence_classes.connect(1, 2)
         source_node = self.equivalence_classes.get_node(1)
-        self.assertIn(Node(2), source_node.connected_nodes)
+        self.assertIn(Node(2), source_node.destinations)
+        destination_node = self.equivalence_classes.get_node(2)
+        self.assertIn(Node(1), destination_node.sources)

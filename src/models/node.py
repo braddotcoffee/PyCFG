@@ -4,7 +4,8 @@ from typing import Set
 class Node:
     def __init__(self, identifier: any):
         self.identifier = identifier
-        self.connected_nodes: Set[Node] = set()
+        self.sources: Set[Node] = set()
+        self.destinations: Set[Node] = set()
 
     def __eq__(self, value):
         if not isinstance(value, Node):
