@@ -37,10 +37,7 @@ class BasicBlock:
     _next_id = 0
 
     def __init__(
-        self,
-        body: List[AST] = None,
-        inbound: List["BasicBlock"] = None,
-        outbound: List["BasicBlock"] = None,
+        self, body: List[AST] = None,
     ):
         self.identifier = BasicBlock._next_id
         BasicBlock._next_id += 1
