@@ -90,7 +90,7 @@ class EquivalenceClasses:
         ):
             raise ValueError(
                 "Both union identifiers must already exist within"
-                "an equivalence class"
+                " an equivalence class"
             )
         item_one_idx = self._identifiers[identifier_one]
         item_two_idx = self._identifiers[identifier_two]

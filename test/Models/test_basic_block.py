@@ -22,7 +22,7 @@ class TestBasicBlockFromAst(unittest.TestCase):
 
     def test_build_returns_BasicBlock(self):
         sample_ast = [Expr(Constant())]
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             sample_ast
         )
         self.assertIsInstance(basic_block, BasicBlock)
@@ -40,7 +40,7 @@ class TestBasicBlockFromAst(unittest.TestCase):
         sample_code = "print('Hello, world!')"
         module = parse(sample_code)
         function_call = module.body[0].value
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertIsInstance(basic_block, BasicBlock)
@@ -53,7 +53,7 @@ class TestBasicBlockFromAst(unittest.TestCase):
         sample_code += "print('Hello World 2')\n"
         sample_code += "print('Hello World 3')"
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertIsInstance(basic_block, BasicBlock)
@@ -66,7 +66,7 @@ class TestBasicBlockFromAst(unittest.TestCase):
         sample_code += "    pass"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.function_calls), 2)
@@ -80,7 +80,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    pass"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -90,7 +90,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    pass"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -100,7 +100,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    pass"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -109,7 +109,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code = "return\n"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -119,7 +119,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    print(i)"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -128,7 +128,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    print(i)"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 0)
@@ -141,7 +141,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "    x += 2\n"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 1)
@@ -153,7 +153,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "print('Test')\n"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertEqual(len(basic_block.body), 1)
@@ -165,7 +165,7 @@ class TestBasicBlockIgnoresEntrancesAndExits(unittest.TestCase):
         sample_code += "print('Test')\n"
 
         module = parse(sample_code)
-        basic_block, remaining_nodes = BasicBlock.build_first_from_ast(
+        (basic_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
             module.body
         )
         self.assertIsInstance(remaining_nodes[0], While)

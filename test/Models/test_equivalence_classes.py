@@ -28,7 +28,7 @@ class TestEquivalenceClasses(unittest.TestCase):
         self.equivalence_classes.add(2)
         self.equivalence_classes.union(1, 2)
         self.assertEqual(
-            self.equivalence_classes.find(1), self.equivalence_classes.find(2)
+            self.equivalence_classes.find(1), self.equivalence_classes.find(2),
         )
 
     def test_can_track_number_unique_classes(self):
@@ -60,7 +60,7 @@ class TestEquivalenceClasses(unittest.TestCase):
         self.equivalence_classes.add(2)
         self.equivalence_classes.connect(1, 2)
         self.assertEqual(
-            self.equivalence_classes.find(1), self.equivalence_classes.find(2)
+            self.equivalence_classes.find(1), self.equivalence_classes.find(2),
         )
 
     def test_connect_errors_with_untracked_identifer(self):
