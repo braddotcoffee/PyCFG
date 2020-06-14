@@ -26,7 +26,7 @@ class CFG:
         return hasattr(node, attribute,) and len(getattr(node, attribute,)) > 0
 
     @staticmethod
-    def _extract_new_ast_nodes(exit_or_entrance: AST,) -> List[List[stmt]]:
+    def _extract_new_ast_nodes(exit_or_entrance: AST) -> List[List[stmt]]:
         """Pull body out of AST node representing newe basic block
 
         Args:
@@ -49,16 +49,12 @@ class CFG:
         for attr in block_attributes:
             if CFG._validate_block_attribute(exit_or_entrance, attr,):
                 new_blocks.append(getattr(exit_or_entrance, attr,))
-        if len(new_blocks) == 0:
-            new_blocks.append(exit_or_entrance)
         return new_blocks
 
     def _connect_if_disconnected(
         self, source: int, destination: int,
     ):
         if source not in self.equivalence_classes:
-            return
-        if destination not in self.equivalence_classes:
             return
 
         if self.equivalence_classes.find(
