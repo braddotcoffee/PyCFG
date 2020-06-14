@@ -31,6 +31,15 @@ class TestEquivalenceClasses(unittest.TestCase):
             self.equivalence_classes.find(1), self.equivalence_classes.find(2),
         )
 
+    def test_union_can_be_repeated_safely(self):
+        self.equivalence_classes.add(1)
+        self.equivalence_classes.add(2)
+        self.equivalence_classes.union(1, 2)
+        self.equivalence_classes.union(1, 2)
+        self.assertEqual(
+            self.equivalence_classes.find(1), self.equivalence_classes.find(2),
+        )
+
     def test_can_track_number_unique_classes(self):
         self.assertEqual(0, self.equivalence_classes.count)
         self.equivalence_classes.add(1)
