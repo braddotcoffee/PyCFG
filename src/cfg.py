@@ -23,6 +23,16 @@ class CFG:
 
     @staticmethod
     def _validate_block_attribute(node: AST, attribute: str,) -> bool:
+        """Validate that an AST node has a valid body under
+        the given attribute name
+
+        Args:
+            node (AST): AST node to check for statments under attribute name
+            attribute (str): Name of attribute to look for
+
+        Returns:
+            bool: True if the attribute contains statements
+        """
         return hasattr(node, attribute,) and len(getattr(node, attribute,)) > 0
 
     @staticmethod
@@ -54,6 +64,13 @@ class CFG:
     def _connect_if_disconnected(
         self, source: int, destination: int,
     ):
+        """Connect two identifiers together
+        if they are not already
+
+        Args:
+            source (int): Identifier of source
+            destination (int): Identifier of destination
+        """
         if source not in self.equivalence_classes:
             return
 
@@ -65,21 +82,42 @@ class CFG:
             )
 
     def _link_try_except_finally(
-        self, current_idx: int, nested_blocks: List[BasicBlock]
+        self, source_idx: int, nested_blocks: List[BasicBlock]
     ):
-        for i in range(current_idx + 1, len(nested_blocks)):
+        """Link try/except/finally bodies together as
+        try -> except, try -> finally, except -> finally
+
+        Args:
+            source_idx (int): Index of the source block to link
+            nested_blocks (List[BasicBlock]): List of all blocks in
+            the Try
+        """
+        for i in range(source_idx + 1, len(nested_blocks)):
             self._connect_if_disconnected(
-                nested_blocks[current_idx].identifier,
+                nested_blocks[source_idx].identifier,
                 nested_blocks[i].identifier,
             )
 
-    def _link_nested_nodes(
+    def _link_nested_blocks(
         self,
         previous_block: BasicBlock,
         nested_blocks: List[BasicBlock],
         next_blocks: List[BasicBlock],
         ast_node: AST,
     ):
+        """Link together the basic blocks that are part of nested control flow
+        to the previous unnested block and the next unnested block
+
+        Args:
+            previous_block (BasicBlock): Block that nested control flow
+            transitions from
+            nested_blocks (List[BasicBlock]): Blocks that are part of nested
+            control flow (if/else bodies, etc)
+            next_blocks (List[BasicBlock]): The next blocks that are part of
+            the same nesting level as previous_block
+            ast_node (AST): The AST entrance node that was responsible for
+            the nested blocks (If, Try, etc.)
+        """
         for i, nested_block in enumerate(nested_blocks):
             self._connect_if_disconnected(
                 previous_block.identifier, nested_block.identifier,
@@ -91,9 +129,36 @@ class CFG:
             if isinstance(ast_node, Try):
                 self._link_try_except_finally(i, nested_blocks)
 
+    def _build_nested_blocks(self, entrance_node: AST) -> List[BasicBlock]:
+        """Build the basic blocks nested below the given entrance node
+
+        Args:
+            entrance_node (AST): AST node that signifies the start
+            of a new basic block
+
+        Returns:
+            List[BasicBlock]: The basic blocks representing the statements
+            embedded within the body attributes of entrance_node
+        """
+        nested_nodes = CFG._extract_new_ast_nodes(entrance_node)
+        nested_blocks: List[BasicBlock] = []
+        for nested_block_nodes in nested_nodes:
+            nested_blocks += self._build_all_basic_blocks(nested_block_nodes)
+        return nested_blocks
+
     def _build_all_basic_blocks(
         self, ast_nodes: List[AST],
     ) -> List[BasicBlock]:
+        """Parse all basic blocks out of the list of nodes
+
+        Args:
+            ast_nodes (List[AST]): AST nodes containing statements
+            that make up basic blocks
+
+        Returns:
+            List[BasicBlock]: All of the basic blocks that are
+            formed by the given nodes
+        """
         basic_blocks: List[BasicBlock] = []
         new_block, remaining_nodes = BasicBlock.build_first_from_ast(ast_nodes)
 
@@ -104,21 +169,9 @@ class CFG:
             return basic_blocks
 
         # Entering new basic block
-        entrance_node = remaining_nodes[0]
-        nested_nodes = CFG._extract_new_ast_nodes(entrance_node)
-        remaining_nodes = remaining_nodes[1:]
-        nested_blocks: List[BasicBlock] = []
-        for nested_block_nodes in nested_nodes:
-            nested_blocks += self._build_all_basic_blocks(nested_block_nodes)
-        unnested_blocks = self._build_all_basic_blocks(remaining_nodes)
-        self._link_nested_nodes(
-            new_block, nested_blocks, unnested_blocks, entrance_node
+        nested_blocks = self._build_nested_blocks(remaining_nodes[0])
+        unnested_blocks = self._build_all_basic_blocks(remaining_nodes[1:])
+        self._link_nested_blocks(
+            new_block, nested_blocks, unnested_blocks, remaining_nodes[0]
         )
-        basic_blocks += nested_blocks + unnested_blocks
-
-        # Connect current block to the first nested block
-        if new_block.identifier in self.equivalence_classes:
-            self.equivalence_classes.connect(
-                new_block.identifier, nested_blocks[0].identifier,
-            )
-        return basic_blocks
+        return basic_blocks + nested_blocks + unnested_blocks
