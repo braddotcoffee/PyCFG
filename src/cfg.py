@@ -2,6 +2,7 @@ from typing import List
 from ast import AST, stmt
 from src.models.basic_block import BasicBlock
 from src.models.equivalence_classes import EquivalenceClasses
+from _ast import Try
 
 
 class CFG:
@@ -26,6 +27,17 @@ class CFG:
 
     @staticmethod
     def _extract_new_ast_nodes(exit_or_entrance: AST,) -> List[List[stmt]]:
+        """Pull body out of AST node representing newe basic block
+
+        Args:
+            exit_or_entrance (AST): AST node containing statements that
+            make up a new basic block
+
+        Returns:
+            List[List[stmt]]: An array of the bodies of each branch
+            of the AST Node. Example: try/except/finally will return
+            [[try_body], [except_body], [finally_body]]
+        """
         new_blocks: List[List[stmt]] = []
         block_attributes = [
             "body",
@@ -45,9 +57,9 @@ class CFG:
         self, source: int, destination: int,
     ):
         if source not in self.equivalence_classes:
-            self.equivalence_classes.add(source)
+            return
         if destination not in self.equivalence_classes:
-            self.equivalence_classes.add(destination)
+            return
 
         if self.equivalence_classes.find(
             source
@@ -56,13 +68,38 @@ class CFG:
                 source, destination,
             )
 
+    def _link_try_except_finally(
+        self, current_idx: int, nested_blocks: List[BasicBlock]
+    ):
+        for i in range(current_idx + 1, len(nested_blocks)):
+            self._connect_if_disconnected(
+                nested_blocks[current_idx].identifier,
+                nested_blocks[i].identifier,
+            )
+
+    def _link_nested_nodes(
+        self,
+        previous_block: BasicBlock,
+        nested_blocks: List[BasicBlock],
+        next_blocks: List[BasicBlock],
+        ast_node: AST,
+    ):
+        for i, nested_block in enumerate(nested_blocks):
+            self._connect_if_disconnected(
+                previous_block.identifier, nested_block.identifier,
+            )
+            if len(next_blocks) > 0:
+                self._connect_if_disconnected(
+                    next_blocks[0].identifier, nested_block.identifier,
+                )
+            if isinstance(ast_node, Try):
+                self._link_try_except_finally(i, nested_blocks)
+
     def _build_all_basic_blocks(
         self, ast_nodes: List[AST],
     ) -> List[BasicBlock]:
         basic_blocks: List[BasicBlock] = []
-        (new_block, remaining_nodes,) = BasicBlock.build_first_from_ast(
-            ast_nodes
-        )
+        new_block, remaining_nodes = BasicBlock.build_first_from_ast(ast_nodes)
 
         if len(new_block.body) > 0:
             basic_blocks.append(new_block)
@@ -70,28 +107,20 @@ class CFG:
         if len(remaining_nodes) == 0:
             return basic_blocks
 
-        # Build basic blocks for nested control flow
-        nested_nodes = CFG._extract_new_ast_nodes(remaining_nodes[0])
+        # Entering new basic block
+        entrance_node = remaining_nodes[0]
+        nested_nodes = CFG._extract_new_ast_nodes(entrance_node)
         remaining_nodes = remaining_nodes[1:]
         nested_blocks: List[BasicBlock] = []
         for nested_block_nodes in nested_nodes:
             nested_blocks += self._build_all_basic_blocks(nested_block_nodes)
         unnested_blocks = self._build_all_basic_blocks(remaining_nodes)
-        for i, nested_block in enumerate(nested_blocks):
-            self._connect_if_disconnected(
-                new_block.identifier, nested_block.identifier,
-            )
-            if len(unnested_blocks) > 0:
-                self._connect_if_disconnected(
-                    unnested_blocks[0].identifier, nested_block.identifier,
-                )
-            for j in range(i + 1, len(nested_blocks)):
-                self._connect_if_disconnected(
-                    nested_block.identifier, nested_blocks[j].identifier
-                )
+        self._link_nested_nodes(
+            new_block, nested_blocks, unnested_blocks, entrance_node
+        )
         basic_blocks += nested_blocks + unnested_blocks
 
-        # Connect current block to the first block
+        # Connect current block to the first nested block
         if new_block.identifier in self.equivalence_classes:
             self.equivalence_classes.connect(
                 new_block.identifier, nested_blocks[0].identifier,

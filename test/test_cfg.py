@@ -57,6 +57,17 @@ class TestCFGBuildBasicBlocks(unittest.TestCase):
         cfg = CFG(module.body)
         self.assertEqual(4, len(cfg.basic_blocks))
 
+    def test_if_elif_else(self):
+        sample_code = "if True:\n"
+        sample_code += "     print('Test')\n"
+        sample_code += "elif True:\n"
+        sample_code += "     x = 1\n"
+        sample_code += "else:\n"
+        sample_code += "     print('Test')\n"
+        module = parse(sample_code)
+        cfg = CFG(module.body)
+        self.assertEqual(3, len(cfg.basic_blocks))
+
     def test_try_except_finally(self):
         sample_code = "try:\n"
         sample_code += "    print('Test')\n"
@@ -127,7 +138,7 @@ class TestParsedEquivalenceClasses(unittest.TestCase):
     def test_if_elif_else_disconnected(self):
         sample_code = "if True:\n"
         sample_code += "    print('Test')\n"
-        sample_code = "elif True:\n"
+        sample_code += "elif True:\n"
         sample_code += "    x = 1\n"
         sample_code += "else:\n"
         sample_code += "    print('Test')\n"
@@ -139,3 +150,19 @@ class TestParsedEquivalenceClasses(unittest.TestCase):
         self.assertEqual(3, cfg.equivalence_classes.count)
         for basic_block in cfg.basic_blocks:
             self.assertIn(basic_block.identifier, cfg.equivalence_classes)
+
+    def test_nested_blocks_connect_either_end(self):
+        sample_code = "print('Test')\n"
+        sample_code += "if True:\n"
+        sample_code += "    print('Test')\n"
+        sample_code += "elif True:\n"
+        sample_code += "    x = 1\n"
+        sample_code += "else:\n"
+        sample_code += "    print('Test')\n"
+        sample_code += "print('Test')\n"
+
+        module = parse(sample_code)
+        cfg = CFG(module.body)
+
+        self.assertEqual(5, len(cfg.basic_blocks))
+        self.assertEqual(1, cfg.equivalence_classes.count)
